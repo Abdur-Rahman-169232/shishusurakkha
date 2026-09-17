@@ -9,6 +9,7 @@ function notifyQueueChanged() {
 }
 
 export function getQueue() {
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
     if (!raw) return [];
@@ -54,6 +55,7 @@ export function getQueueCount() {
 }
 
 export function getOnlineMode() {
+  if (typeof window === "undefined") return true;
   try {
     const raw = localStorage.getItem(ONLINE_KEY);
     if (raw === null) return true;

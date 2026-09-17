@@ -15,11 +15,11 @@ The app is built for cheap Android phones, one-handed use, bright outdoor light,
 - **Voice reminders** — Standard Bengali, Chittagonian, and Sylheti IVR scripts with generated audio
 - **DHIS2 export** — download a Tracked Entity Instance payload for the national HMIS
 
-Child and vaccine records are stored **on-device** (offline-first). There is no remote entity database.
+Child and vaccine records are stored in **Vercel Blob** and cached on-device for offline field use.
 
 ## Tech stack
 
-React 18, Vite, Tailwind CSS, React Router v6, Firebase Auth, Base44 (optional OCR / speech / platform login).
+Next.js 14 (App Router), React 18, Tailwind CSS, Vercel Blob, Firebase Auth, Base44 (optional OCR / speech / platform login). Hosted on Vercel.
 
 ## Getting started
 
@@ -28,23 +28,41 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Copy `.env.example` to `.env` for optional cloud services.
+Open [http://localhost:3000](http://localhost:3000). Copy `.env.example` to `.env.local` for optional cloud services.
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_BASE44_APP_ID` | Optional. Platform login, card OCR, and text-to-speech |
-| `VITE_FIREBASE_*` | Optional. Parallel Firebase Auth (`/firebase/login`) |
+| `NEXT_PUBLIC_BASE44_APP_ID` | Optional. Platform login, card OCR, and text-to-speech |
+| `NEXT_PUBLIC_FIREBASE_*` | Optional. Parallel Firebase Auth (`/firebase/login`) |
 
-Without these keys the tracker still runs: local demo login, on-device registry, camera capture, and DHIS2 JSON export.
+Without these keys the tracker still runs: local demo login, on-device cache, camera capture, and DHIS2 JSON export. Child records are stored in **Vercel Blob** and cached in the browser for offline use.
+
+| Variable | Purpose |
+| --- | --- |
+| `BLOB_READ_WRITE_TOKEN` | Injected by the Vercel Blob store. Server-only. |
 
 ```bash
 npm run build
-npm run preview
+npm start
+```
+
+## Deploy on Vercel
+
+1. Import [the GitHub repo](https://github.com/Abdur-Rahman-169232/shishusurakkha) in [Vercel](https://vercel.com/new).
+2. Framework preset: **Next.js** (auto-detected).
+3. Add the `NEXT_PUBLIC_*` variables above in Project Settings → Environment Variables if you use Base44 or Firebase.
+4. Deploy. Camera and mic features need HTTPS, which Vercel provides.
+
+Local production check:
+
+```bash
+npm run build
+npm start
 ```
 
 ## Data model
 
-Records live in `localStorage` via [`src/lib/recordsApi.js`](src/lib/recordsApi.js).
+Records live in **Vercel Blob** and are cached in `localStorage` for offline field use. The client API is [`src/lib/recordsApi.js`](src/lib/recordsApi.js); the server store is [`src/lib/db.js`](src/lib/db.js).
 
 **Child** — `shishu_id` (`SHISHU-YYYY-NNNNNN`), mother name/NID/phone, EPI center, DOB, gender, district, upazila, `sync_status`, `zero_dose`
 

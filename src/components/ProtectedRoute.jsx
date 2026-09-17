@@ -1,10 +1,26 @@
+"use client";
+
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 
-function ProtectedRoute({ unauthenticatedElement }) {
+function UnauthenticatedRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/login");
+  }, [router]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
+
+function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoadingAuth, authError, hasCheckedAuth, checkUserAuth } = useAuth();
 
   useEffect(() => {
@@ -26,10 +42,10 @@ function ProtectedRoute({ unauthenticatedElement }) {
   }
 
   if (!isAuthenticated) {
-    return unauthenticatedElement;
+    return <UnauthenticatedRedirect />;
   }
 
-  return <Outlet />;
+  return children;
 }
 
 export default ProtectedRoute;

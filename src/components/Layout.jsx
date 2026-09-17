@@ -1,5 +1,8 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Activity, Database, Mic, ScanLine, Users, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getOnlineMode, getQueueCount, QUEUE_CHANGED_EVENT, setOnlineMode } from "@/lib/offlineQueue";
@@ -13,7 +16,18 @@ const NAV = [
   { to: "/dhis2", label: "DHIS2 Sync", icon: Database },
 ];
 
-function Layout() {
+function NavItem({ href, exact, className, children }) {
+  const pathname = usePathname();
+  const isActive = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  const classes = typeof className === "function" ? className({ isActive }) : className;
+  return (
+    <Link href={href} className={classes}>
+      {children}
+    </Link>
+  );
+}
+
+function Layout({ children }) {
   const [onlineMode, setOnlineModeState] = useState(() => getOnlineMode());
   const [queueCount, setQueueCount] = useState(() => getQueueCount());
   const [browserOnline, setBrowserOnline] = useState(() =>
@@ -81,22 +95,20 @@ function Layout() {
         </div>
         <nav className="flex-1 space-y-1 px-3">
           {NAV.map((item) => (
-            <NavLink
+            <NavItem
               key={item.to}
-              to={item.to}
-              end={item.to === "/"}
+              href={item.to}
+              exact={item.to === "/"}
               className={({ isActive }) =>
                 cn(
                   "flex min-h-[48px] items-center gap-3 rounded-xl px-3 text-sm font-semibold",
-                  isActive
-                    ? "bg-white text-primary"
-                    : "text-teal-50 hover:bg-white/10"
+                  isActive ? "bg-white text-primary" : "text-teal-50 hover:bg-white/10"
                 )
               }
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-            </NavLink>
+            </NavItem>
           ))}
         </nav>
         <div className="p-3">
@@ -105,9 +117,7 @@ function Layout() {
             onClick={toggleOnline}
             className={cn(
               "flex min-h-[48px] w-full items-center justify-between rounded-xl px-3 text-sm font-semibold",
-              onlineMode && browserOnline
-                ? "bg-emerald-500/20 text-emerald-50"
-                : "bg-amber-500/20 text-amber-50"
+              onlineMode && browserOnline ? "bg-emerald-500/20 text-emerald-50" : "bg-amber-500/20 text-amber-50"
             )}
           >
             <span className="flex items-center gap-2">
@@ -145,22 +155,20 @@ function Layout() {
       {isOffline ? (
         <div className="sticky top-14 z-10 bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-700 md:top-0 md:ml-64">
           Offline Mode — {queueCount} records pending sync{" "}
-          <Link to="/dhis2" className="underline">
+          <Link href="/dhis2" className="underline">
             Sync Now
           </Link>
         </div>
       ) : null}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-28 md:ml-64 md:pb-8">
-        <Outlet />
-      </main>
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-28 md:ml-64 md:pb-8">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 grid h-14 grid-cols-5 border-t border-border bg-white md:hidden">
         {NAV.map((item) => (
-          <NavLink
+          <NavItem
             key={item.to}
-            to={item.to}
-            end={item.to === "/"}
+            href={item.to}
+            exact={item.to === "/"}
             className={({ isActive }) =>
               cn(
                 "flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[10px] font-semibold",
@@ -170,7 +178,7 @@ function Layout() {
           >
             <item.icon className="h-5 w-5" />
             {item.label.split(" ")[0]}
-          </NavLink>
+          </NavItem>
         ))}
       </nav>
     </div>

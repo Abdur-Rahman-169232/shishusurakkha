@@ -1,5 +1,8 @@
+"use client";
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { publicEnv } from "@/lib/env";
 
 const AuthContext = createContext(null);
 
@@ -25,7 +28,7 @@ export function AuthProvider({ children }) {
   const checkUserAuth = useCallback(async () => {
     setIsLoadingAuth(true);
     try {
-      if (!import.meta.env.VITE_BASE44_APP_ID) {
+      if (!publicEnv.base44AppId) {
         setUser({ id: "local-ha", email: "ha@local.dev", full_name: "Demo Health Assistant", role: "user" });
         setIsAuthenticated(true);
         setAuthError(null);
